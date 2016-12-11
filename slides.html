@@ -48,7 +48,7 @@
         padding-top: 30%;
         padding-left: 10%;
         padding-right: 10%;
-        background-color: #455a64;
+        background-color: #49525E;
       }
 
       /* Basic slide block styles */
@@ -61,7 +61,7 @@
         height: 16%;
         padding-left: 10%;
         padding-right: 10%;
-        background-color: #455a64;
+        background-color: #49525E;
         box-shadow: 0px 5px 5px 0px rgba(51,51,51,0.36);
       }
       .content {
@@ -123,7 +123,7 @@ class: title
 * Android Developer for 4+ years
 * Worked at Accenture, Fabula, Philips
 * Now at FullContact
-* Experimenting with Kotlin since v0.5
+* Experimenting with Kotlin since ~v0.5
 ]
 ---
 .ab[
@@ -131,20 +131,28 @@ class: title
 ]
 .content[
 1. View binding
-2. Extension functions
-3. Listeners
-4. Layouts
-5. Testing
-6. Costs
-7. How to
+2. Power of extensions
+3. Better listeners
+4. Faster layouts
+5. Fluent testing
+6. Costs &amp; Benefits
+7. How to start
 ]
 ---
 .ab[
 ## Assume we have a view
 ]
 .content[
-```
-  // some simple xml layout
+```xml
+  <RelativeLayout 
+    android:id="@+id/form_root">
+
+    <ImageView android:id="@+id/form_photo" />
+    <TextView android:id="@+id/form_first_name" />
+    <TextView android:id="@+id/form_last_name" />
+    <Button android:id="@+id/form_edit" />
+
+  </RelativeLayout>
 ```
 ]
 ---
@@ -152,8 +160,19 @@ class: title
 ## View binding (classic way)
 ]
 .content[
-```
-  // Example of view binding with findById();
+```java
+RelativeLayout root;
+// ...
+Button edit;
+
+@Override void onCreate(Bundle savedInstanceState) {
+  // super + setContentView
+  root = (RelativeLayout) findViewById(R.id.form_root);
+  photo = (ImageView) findViewById(R.id.form_photo);
+  firstName = (TextView) findViewById(R.id.form_first_name);
+  lastName = (TextView) findViewById(R.id.form_last_name);
+  edit = (Button) findViewById(R.id.form_edit);
+}
 ```
 ]
 .footnote[
@@ -164,12 +183,22 @@ class: title
 ## View binding (proper way)
 ]
 .content[
-```
-  // Example of view binding with Butterknife
+```java
+@BindView(R.id.form_root) RelativeLayout root;
+@BindView(R.id.form_photo) ImageView photo;
+@BindView(R.id.form_firstName) TextView firstName;
+@BindView(R.id.form_lastName) TextView lastName;
+@BindView(R.id.form_edit) Button edit;
+
+@Override void onCreate(Bundle savedInstanceState) {
+   // super + setContentView
+   ButterKnife.bind(this);
+}
+
 ```
 ]
 .footnote[
-[Butterknife](http://butterknife.com/)
+[Butterknife](http://jakewharton.github.io/butterknife/)
 ]
 ---
 .ab[
@@ -177,7 +206,15 @@ class: title
 ]
 .content[
 ```
-  // Example of view binding with AndroidX
+import kotlinx.android.synthetic.main.form_layout.*
+
+@Override 
+fun onCreate(savedInstanceState: Bundle) {
+  // super + setContentView
+
+  form_first_name.text = "John"
+  view.form_last_name.text = "Doe"
+}
 ```
 ]
 .footnote[
@@ -189,7 +226,19 @@ class: title
 ]
 .content[
 ```
-  // Examples of cool extension functions
+fun ViewGroup.inflate(
+  @LayoutRes layoutRes: Int, 
+  attachToRoot: Boolean = false
+): View {
+ return LayoutInflater.from(context)
+           .inflate(layoutRes, this, attachToRoot)
+}
+```
+
+```
+parent.inflate(R.layout.my_layout)
+parent.inflate(R.layout.my_layout, true)
+
 ```
 ]
 .footnote[
@@ -202,42 +251,136 @@ class: title
 ]
 ---
 .ab[
-## Listeners & callbacks (old way)
+## Neat extension functions
+]
+.content[
+```
+fun ImageView.loadUrl(url: String) {
+    Picasso.with(context).load(url).into(this)
+}
+
+```
+
+```
+imageView.loadUrl("http://....")
+
+```
+]
+.footnote[
+[antonioleiva.com](http://antonioleiva.com/kotlin-awesome-tricks-for-android/)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[toptal.com](https://www.toptal.com/android/kotlin-boost-android-development)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[kotlin.link](https://kotlin.link/articles/Ten-Kotlin-Features-To-Boost-Android-Development.html
+)
+]
+---
+.ab[
+## Neat extension functions
+]
+.content[
+```
+fun View.setVisible(visible: Boolean) {
+    this.visibility = if (visible) View.VISIBLE else View.GONE
+}
+
+```
+
+```
+imageView.setVisible(true)
+imageView.setVisible(false)
+
+```
+]
+.footnote[
+[antonioleiva.com](http://antonioleiva.com/kotlin-awesome-tricks-for-android/)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[toptal.com](https://www.toptal.com/android/kotlin-boost-android-development)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+[kotlin.link](https://kotlin.link/articles/Ten-Kotlin-Features-To-Boost-Android-Development.html
+)
+]
+---
+.ab[
+## Listeners &amp; callbacks (old way)
+]
+.content[
+View action listeners:
+```java
+button.setOnClickListener(new OnClickListener() {
+  @Override
+  void onClick(View view) {
+    // do stuff when button clicked
+  }
+});
+```
+]
+---
+.ab[
+## Listeners &amp; callbacks (Kotlin way)
 ]
 .content[
 View action listeners:
 ```
-  // Code for some basic callback/listener
+button.setOnClickListener { view ->
+  // do stuff when button clicked
+}
 ```
 ]
 ---
 .ab[
-## Listeners & callbacks (old way)
+## Listeners &amp; callbacks (old way)
+]
+.content[
+Basic callback:
+```java
+interface ActionCallback {
+  void onActionDone();
+}
+
+public void doAction(int param, @Nullable ActionCallback cb) {
+  // do stuff
+  if (cb != null ) {
+    cb.onActionDone()
+  }
+}
+```
+]
+---
+.ab[
+## Listeners &amp; callbacks (old way)
+]
+.content[
+Basic callback:
+```java
+public void fooBar() {
+  doAction(5, new ActionCallback(){
+    @Override 
+    void onActionDone() {
+      // do stuff when action is done
+    }
+  });
+}
+```
+]
+---
+.ab[
+## Listeners &amp; callbacks (Kotlin way)
 ]
 .content[
 Basic callback:
 ```
-  // Code for some basic callback/listener
-```
-]
----
-.ab[
-## Listeners & callbacks (Kotlin way)
-]
-.content[
-View action listeners:
-```
-  // Code for same listener
-```
-]
----
-.ab[
-## Listeners & callbacks (Kotlin way)
-]
-.content[
-Basic callback:
-```
-  // Code for same callback as function
+fun doActions(param: Int, callback: (() -> Unit)?)  {
+  // do stuff
+  callback?.invoke()
+}
+
+fun fooBar() {
+  doAction(5) {
+      // do stuff when action is done
+  }
+  doAction(7, null)
+}
 ```
 ]
 ---
@@ -246,7 +389,7 @@ Basic callback:
 ]
 .content[
 * Lots of extensions
-* Easy DSL for layouts
+* DSL for layouts
   * Completly code based
   * ~~Allegedly~~ 4x faster than xml
 ]
@@ -259,7 +402,19 @@ Basic callback:
 ]
 .content[
 ```
- // Samples of useful extenstion functions
+startActivity<SomeOtherActivity>("id" to 5)
+```
+```
+alert("Hi, I'm Roy", "Have you tried turning it off and on again?") {
+    yesButton { toast("Oh…") }
+    noButton {}
+}.show()
+```
+```
+doAsync {
+    // Long background task
+    uiThread { result.text = "Done" }
+}
 ```
 ]
 .footnote[
@@ -271,7 +426,18 @@ Basic callback:
 ]
 .content[
 ```
- // Example of Anko layout dsl
+ override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    verticalLayout {
+        padding = dip(30)
+        editText { hint = "Name" }
+        editText { hint = "Password" }
+        button("Edit") {
+            textSize = 26f
+        }
+    }
+}
 ```
 ]
 .footnote[
@@ -290,7 +456,7 @@ General frameworks:
 Libraries for Android:
 * [mockito-kotlin](https://github.com/nhaarman/mockito-kotlin)
 * [hamkrest](https://github.com/npryce/hamkrest)
-* [Kluent](https://github.com/nhaarman/mockito-kotlin)]
+* [Kluent](https://github.com/MarkusAmshove/Kluent)]
 ]
 ---
 .ab[
@@ -298,11 +464,19 @@ Libraries for Android:
 ]
 .content[
 ```
- // Example of kluent syntax
+val subject : String = getInput()
+subject shouldEqual "hello"
+subject shouldNotEqual "world"
+```
+```
+val mock = mock(Database::class)
+mock.getPerson()
+
+Verify on mock that mock.getPerson() was called
 ```
 ]
 .footnote[
-[Kluent](https://github.com/nhaarman/mockito-kotlin)
+[Kluent](https://github.com/MarkusAmshove/Kluent)
 ]
 ---
 .ab[
@@ -320,14 +494,62 @@ Libraries for Android:
 ]
 ---
 .ab[
-## How to start?
+## Benefits
 ]
 .content[
-.compact[
-1. Install Kotlin plugin 
-2. Add following to `build.gradle` files:]
+* Up to 30% less code
+* Powerful standart library
+  * No need for Retrolabda, Guava, ButterKnife etc.
+  * Less need for RxJava
+* Coding is pure joy
+]
+.footnote[
+[Keepsafe article](https://medium.com/keepsafe-engineering/lessons-from-converting-an-app-to-100-kotlin-68984a05dcb6#.yw9gd1gg8)
+]
+---
+.ab[
+## How to start? Easy way
+]
+.content[
+* Install plugin
+* Tools > Kotlin > Configure Kotlin in Project
+* Code > Convert Java file to Kotlin file
+]
+---
+.ab[
+## How to start? Proper way
+]
+.content[
+Project `build.gradle`:
 ```
-  // gradle changes need to add Koltin
+buildscript {
+  ext.kotlin = "X.Y.Z"
+  dependencies {
+    classpath 
+      "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin"
+    classpath 
+      "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin"
+  }
+}
+```
+]
+---
+.ab[
+## How to start? Proper way
+]
+.content[
+Module `build.gradle`:
+```
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
+sourceSets {
+    main.java.srcDirs += 'src/main/kotlin'
+}
+
+dependancies {
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin"
+}
 ```
 ]
 ---
