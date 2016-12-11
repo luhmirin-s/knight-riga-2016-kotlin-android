@@ -110,7 +110,7 @@
     <textarea id="source">
 class: title 
 
-# Kotlin & Android
+# Kotlin &amp; Android
 
 .name[### Sergejs Luhmirins, 2016]
 
@@ -317,6 +317,19 @@ button.setOnClickListener(new OnClickListener() {
 ]
 ---
 .ab[
+## Listeners &amp; callbacks (newer way)
+]
+.content[
+View action listeners:
+```java
+button.setOnClickListener(view -> {
+    // do stuff when button clicked
+});
+```
+But requires Jack&amp;Jill or Retrolambda
+]
+---
+.ab[
 ## Listeners &amp; callbacks (Kotlin way)
 ]
 .content[
@@ -362,6 +375,21 @@ public void fooBar() {
   });
 }
 ```
+]
+---
+.ab[
+## Listeners &amp; callbacks (newer way)
+]
+.content[
+Basic callback:
+```java
+public void fooBar() {
+  doAction(5, () -> {
+      // do stuff when action is done
+  });
+}
+```
+But requires Jack&amp;Jill or Retrolambda
 ]
 ---
 .ab[
